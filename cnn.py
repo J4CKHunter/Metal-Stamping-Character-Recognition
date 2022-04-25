@@ -6,12 +6,10 @@ import time
 import cv2
 from PIL import Image
 import imutils
-from PIL import ImageFilter
 from pytesseract import pytesseract
 
-
-imageAdress = "Dataset/new3.jpg" 
 pytesseract.tesseract_cmd = "C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"
+imageAdress = "Dataset/6.jpg" 
 
 def detectTextForCrop(imageAdress):
         img = Image.open(imageAdress)
@@ -53,37 +51,52 @@ def detectTextForCrop(imageAdress):
             img = cv2.imread(imageAdress)
             return img
 
-
 def detectLettersFromImage(mainImg):
     image = mainImg.copy()
     dst = cv2.fastNlMeansDenoisingColored(image.copy(), None, 10, 10, 7, 15)
-
+    print('>> Removing Noise from cropped Text Roi')
     gray = cv2.cvtColor(dst,cv2.COLOR_BGR2GRAY)
+    kernel = np.ones((5,5), np.uint8)
+    blurred = cv2.GaussianBlur(gray, (3, 7), 13)
+    img_erosion = cv2.erode(blurred, kernel, iterations=1)
+    #img_dilation = cv2.dilate(gray, kernel, iterations=1)
+    edge = cv2.Canny(img_erosion,80,30)
+    cv2.imshow("edge",edge)
+
+    edge = np.uint8(edge)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(10,500))
+    closing = cv2.morphologyEx(edge, cv2.MORPH_CLOSE, kernel)
     
-    cv2.imshow('gray', gray)
-
-    #median = cv2.medianBlur(gray,5) #hem iyi hem kötü
-
-    edge = cv2.Canny(gray,40,20) #40,20
-    cv2.imshow('edge', edge)
+    print('>> Generating vertical projection')
+    kernel = np.ones((11,9), np.uint8)
+    img_dilation = cv2.dilate(edge, kernel, iterations=1)
+    edge = img_dilation
     
-    #blurred = cv2.GaussianBlur(edge, (3, 7), 13)
-    kernel = np.ones((5,5),np.float32)/25
-    blurred = cv2.filter2D(edge,-1,kernel)
- 
+    ctrs,_ = cv2.findContours(closing.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    sorted_ctrs = sorted(ctrs, key=lambda ctr: cv2.boundingRect(ctr)[0])
+    idx = 1
+    segments = {}
+    for i, ctr in enumerate(sorted_ctrs): 
+        x, y, w, h = cv2.boundingRect(ctr) 
+        roi = image[y:y+h, x:x+w] #bunu kullanmamış
+        if h>20 and w>10:
+            cv2.rectangle(image,(x-7,y+10),( x + w, y + h-10 ),(0,255,),2)
+            segments.update({idx:(x-7,y+10,x+w,y+h-10)})
+            idx+=1 
+    print('Karakterler tespit ediliyor')
+    text_segment = {}
+    for i in range(1,len(segments)+1):
+        x,y,w,h = segments[i]
+        cropped_segment = mainImg[y:h, x:w]
+        text_segment.update({i:cropped_segment})
+        cv2.imwrite('Letters/'+str(i)+'.jpg',cropped_segment)
+    return image
 
-    
 
-    words_in_image =pytesseract.image_to_string(blurred)
-
-    cv2.imshow('lastImage', blurred)
-
-    print(words_in_image)
-
-    return mainImg
 mainImg = detectTextForCrop(imageAdress)
 
 mainImg = detectLettersFromImage(mainImg)
+
 
 
 

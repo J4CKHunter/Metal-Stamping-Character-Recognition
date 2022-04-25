@@ -6,8 +6,9 @@ import time
 import cv2
 from PIL import Image
 import imutils
+from pytesseract import pytesseract
 
-
+pytesseract.tesseract_cmd = "C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"
 imageAdress = "Dataset/9.jpg" 
 
 def detectTextForCrop(imageAdress):
@@ -84,12 +85,37 @@ def detectLettersFromImage(mainImg):
         cv2.imwrite('Letters/'+str(i)+'.jpg',cropped_segment)
     return image
 
+def photoToText():
+    imageAdress = "Letters/1.jpg"
+    img = cv2.imread(imageAdress)
 
+    dst = cv2.fastNlMeansDenoisingColored(img.copy(), None, 10, 10, 7, 15)
+
+    gray = cv2.cvtColor(dst,cv2.COLOR_BGR2GRAY)
+    
+    blurred = cv2.GaussianBlur(gray, (3, 7), 13)
+    edge = cv2.Canny(blurred,80,30)
+    
+    kernel = np.ones((5,5), np.uint8)
+ 
+
+    img_erosion = cv2.erode(edge, kernel, iterations=1)
+    img_dilation = cv2.dilate(edge, kernel, iterations=1)
+    
+    cv2.imshow('test', img_dilation)
+
+
+    words_in_image =pytesseract.image_to_string(img_dilation)
+
+    print(words_in_image)
+
+    print("hello world")
 
 mainImg = detectTextForCrop(imageAdress)
 
 mainImg = detectLettersFromImage(mainImg)
 
+photoToText()
 
 
 cv2.imshow('main', mainImg)
