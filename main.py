@@ -57,35 +57,20 @@ def detectTextForCrop(imageAdress):
 def detectLettersFromImage(mainImg):
     image = mainImg.copy()
     dst = cv2.fastNlMeansDenoisingColored(image.copy(), None, 10, 10, 7, 15)
-
     gray = cv2.cvtColor(dst,cv2.COLOR_BGR2GRAY)
-    
-    cv2.imshow('gray', gray)
-
-    #median = cv2.medianBlur(gray,5) #hem iyi hem kötü
-
+    #cv2.imshow('gray', gray)
     edge = cv2.Canny(gray,40,20) #40,20
-    cv2.imshow('edge', edge)
-    
-    #blurred = cv2.GaussianBlur(edge, (3, 7), 13)
+    #cv2.imshow('edge', edge)
     kernel = np.ones((5,5),np.float32)/25
     blurred = cv2.filter2D(edge,-1,kernel)
- 
-
-    
-
     words_in_image =pytesseract.image_to_string(blurred)
-
-    cv2.imshow('lastImage', blurred)
-
+    #cv2.imshow('lastImage', blurred)
     print(words_in_image)
-
     return mainImg
+
+
 mainImg = detectTextForCrop(imageAdress)
-
 mainImg = detectLettersFromImage(mainImg)
-
-
 
 cv2.imshow('main', mainImg)
 cv2.waitKey(0)
