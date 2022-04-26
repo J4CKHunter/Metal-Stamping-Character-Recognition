@@ -10,7 +10,7 @@ from PIL import ImageFilter
 from pytesseract import pytesseract
 
 
-imageAdress = "Dataset/new3.jpg" 
+imageAdress = "Dataset/9.jpg" 
 pytesseract.tesseract_cmd = "C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"
 
 def detectTextForCrop(imageAdress):

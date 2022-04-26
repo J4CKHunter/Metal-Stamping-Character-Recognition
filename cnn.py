@@ -9,7 +9,7 @@ import imutils
 from pytesseract import pytesseract
 
 pytesseract.tesseract_cmd = "C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"
-imageAdress = "Dataset/6.jpg" 
+imageAdress = "Dataset/9.jpg" 
 
 def detectTextForCrop(imageAdress):
         img = Image.open(imageAdress)
