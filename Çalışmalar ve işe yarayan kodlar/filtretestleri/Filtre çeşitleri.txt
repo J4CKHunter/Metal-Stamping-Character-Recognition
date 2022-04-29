@@ -1,0 +1,12 @@
+Sepia
+invert
+darken
+edge enchament
+remove noise
+
+edge detection
+sharpen image
+colorized image(Black)
+Blur image
+BRIGHTNESS AND CONTRAST
+duotone effect Spotify(custom seç +invert ++beyaz +siyah))
